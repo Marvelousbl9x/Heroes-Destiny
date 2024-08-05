@@ -1,0 +1,51 @@
+def game():
+    print("Welcome to Hero's Destiny!")
+    name = input("Enter your character's name: ").strip()
+    player = Player(name)
+    turns_survived = 0
+    boss_turn = 100
+    
+    while player.is_alive():
+        if turns_survived == 25:
+            if not math_minigame():
+                break
+        
+        if turns_survived == 50:
+            trader(player)
+
+        if turns_survived == 75:
+            pursuit(player)
+        
+        encounter(player)
+        player.temp_damage_bonus = 0  # Reset temporary damage bonus after each encounter
+        turns_survived += 1
+
+        if turns_survived == boss_turn:
+            boss_fight(player)
+            if player.is_alive():
+                print(f"\nCongratulations! You defeated the boss and won the game. Hope you didn't run like a coward and just went straight for the boss!")
+            break
+
+        if not player.is_alive():
+            print("\nYou have died. Your destiny came to an end!")
+            break
+        
+        if turns_survived in [6, 9, 15, 28, 35, 51, 65, 74]:
+            shop(player)
+
+        continue_game = input("Do you want to continue exploring? (y/n) ").strip().lower()
+        if continue_game == 'n':
+            print("Exiting the game. Thanks for playing!")
+            break
+        elif continue_game != 'y':
+            print("Invalid choice. The game will now end.")
+            break
+    
+    if player.is_alive() and turns_survived != boss_turn:
+        print("\nGame Over. Thanks for playing!")
+        print(f"{player.name}'s final stats: HP = {player.hp}, Inventory = {player.inventory}")
+
+# Start the game
+if __name__ == "__main__":
+    game()
+    
