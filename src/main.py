@@ -1,13 +1,12 @@
 import random
 
-# Game entities
 class Player:
     def __init__(self, name):
         self.name = name
         self.hp = 100
         self.inventory = {
             "sword": 0,
-            "gold coin": 0,
+            "gold coin": 10,  # Start with some gold coins for purchasing
             "health potion": 0,
             "robux gift card": 0,
             "chicken nuggets": 0
@@ -85,17 +84,16 @@ def create_monster():
     return random.choice(monsters)
 
 def create_boss():
-    return Boss("G-Man", 500, 30)
+    return Boss("Ohio Skibidi Sigma", 500, 30)
 
 def land_mine_room(player):
     print("\nYou entered a room with land mines!")
     print("Solve these math problems to escape:")
     problems = [
-        (12 * 7, 84),
-        (56 / 8, 7),
-        (18 + 29, 47),
-        (144 - 88, 56),
-        (23 * 15, 345)
+        ("12 * 7", 84),
+        ("60 + 9", 69),
+        ("13 - 4", 9),
+        ("50 / 10", 5)
     ]
     for problem, answer in problems:
         user_answer = int(input(f"What is {problem}? "))
@@ -150,56 +148,116 @@ def trader(player):
         else:
             print("Invalid choice. Please try again.")
 
+def trader_turn_50(player):
+    print("\nYou encounter a trader!")
+    print(f"Your inventory: {player.inventory}")
+    print("1. Buy health potion (2 gold coins)")
+    print("2. Buy sword (3 gold coins)")
+    print("3. Buy Robux gift card (5 gold coins)")
+    print("4. Buy chicken nuggets (4 gold coins)")
+    print("5. Sell items")
+    print("6. Exit trader")
+
+    while True:
+        choice = input("What would you like to do? (1/2/3/4/5/6): ").strip()
+        if choice == '1':
+            if player.inventory["gold coin"] >= 2:
+                player.inventory["gold coin"] -= 2
+                player.inventory["health potion"] += 1
+                print("You bought a health potion!")
+            else:
+                print("You don't have enough gold coins!")
+        elif choice == '2':
+            if player.inventory["gold coin"] >= 3:
+                player.inventory["gold coin"] -= 3
+                player.inventory["sword"] += 1
+                print("You bought a sword!")
+            else:
+                print("You don't have enough gold coins!")
+        elif choice == '3':
+            if player.inventory["gold coin"] >= 5:
+                player.inventory["gold coin"] -= 5
+                player.inventory["robux gift card"] += 1
+                print("You bought a Robux gift card!")
+            else:
+                print("You don't have enough gold coins!")
+        elif choice == '4':
+            if player.inventory["gold coin"] >= 4:
+                player.inventory["gold coin"] -= 4
+                player.inventory["chicken nuggets"] += 1
+                print("You bought chicken nuggets!")
+            else:
+                print("You don't have enough gold coins!")
+        elif choice == '5':
+            print("You can sell your items:")
+            for item, count in player.inventory.items():
+                if item != "gold coin" and count > 0:
+                    sell_choice = input(f"Do you want to sell {count} {item}(s)? (y/n): ").strip().lower()
+                    if sell_choice == 'y':
+                        player.inventory["gold coin"] += count
+                        player.inventory[item] = 0
+                        print(f"You sold {count} {item}(s) for {count} gold coin(s).")
+            print(f"Your inventory: {player.inventory}")
+        elif choice == '6':
+            print("Exiting trader.")
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
 def ask_boss_questions(player):
     questions = [
-        ("What is 5 + 7?", 12),
-        ("What is 9 * 6?", 54),
-        ("What is 144 / 12?", 12),
-        ("What is 20 - 8?", 12),
-        ("What is 15 * 4?", 60),
-        ("What is 81 / 9?", 9),
-        ("What is 25 + 30?", 55),
-        ("What is 100 - 45?", 55),
-        ("What is 8 * 7?", 56),
-        ("What is 14 + 9?", 23)
+        ("What has keys but can't open locks?", "piano"),
+        ("What has a head and a tail but no body?", "coin"),
+        ("What gets wetter as it dries?", "towel"),
+        ("What has to be broken before you can use it?", "egg"),
+        ("What can travel around the world while staying in a corner?", "stamp"),
+        ("What is full of holes but still holds water?", "sponge"),
+        ("What has an eye but can't see?", "needle"),
+        ("What has a heart that doesn't beat?", "artichoke"),
+        ("What comes down but never goes up?", "rain"),
+        ("What begins with T, ends with T, and has T in it?", "teapot"),
+        ("What is so fragile that saying its name breaks it?", "silence"),
+        ("What is always in front of you but can't be seen?", "future"),
+        ("What has four fingers and a thumb but isn't alive?", "glove"),
+        ("What is easy to get into but hard to get out of?", "trouble"),
+        ("What has cities but no houses, forests but no trees, and rivers but no water?", "map")
     ]
     
-    for question, answer in random.sample(questions, 5):
-        user_answer = int(input(question + " "))
+    for question, answer in questions:
+        user_answer = input(question + " ").strip().lower()
         if user_answer != answer:
             player.take_damage(50)
-            print("Incorrect answer. You lose 50 HP.")
-            if not player.is_alive():
-                print("You have been defeated. Game Over.")
-                return False
-    return True
+            print("Incorrect answer. You lost 50 HP.")
+        else:
+            print("Correct answer!")
+    
+    if player.is_alive():
+        print("You successfully answered all questions and dealt 100 damage to the boss.")
+        return True
+    else:
+        print("You didn't survive the questions. Game Over.")
+        return False
+
+def boss_preview(player):
+    print("\nYou see a preview of the boss: Ohio Skibidi Sigma.")
+    choice = input("Do you want to pursue the boss? (y/n): ").strip().lower()
+    if choice == 'y':
+        return True
+    return False
 
 def boss_fight(player):
     boss = create_boss()
-    print(f"\nA powerful {boss.name} appears!")
-    
-    # Boss questions between turns 75 and 90
-    if 75 <= turn <= 90:
-        print("The boss is asking questions to weaken you before the final fight!")
-        if not ask_boss_questions(player):
-            return False
+    print(f"\nThe boss {boss.name} appears with {boss.hp} HP!")
     
     while boss.is_alive() and player.is_alive():
-        action = input("Do you want to (a)ttack, use (p)otion, use (g)ift card, or eat (c)hicken nuggets? ").strip().lower()
+        action = input("Do you want to (a)ttack, use (g)ift card, or eat (c)hicken nuggets? ").strip().lower()
         if action == 'a':
             damage = player.attack()
             boss.take_damage(damage)
-            print(f"You deal {damage} damage to {boss.name}.")
+            print(f"You deal {damage} damage to the {boss.name}.")
             if boss.is_alive():
                 player.take_damage(boss.damage)
-                print(f"{boss.name} deals {boss.damage} damage to you.")
-        elif action == 'p':
-            if player.inventory["health potion"] > 0:
-                player.heal(20)
-                player.inventory["health potion"] -= 1
-                print("You use a health potion and heal 20 HP.")
-            else:
-                print("You don't have any health potions!")
+                print(f"The {boss.name} deals {boss.damage} damage to you.")
         elif action == 'g':
             player.use_robux_gift_card()
         elif action == 'c':
@@ -207,70 +265,79 @@ def boss_fight(player):
         else:
             print("Invalid action.")
     
-    if not player.is_alive():
-        print(f"\nYou were defeated by {boss.name}. Game Over.")
+    if player.is_alive():
+        print("Congratulations! You defeated the boss and won the game!")
     else:
-        print(f"\nCongratulations! You defeated the boss and won the game!")
-
-def boss_preview(player):
-    print("\nYou see a preview of the boss!")
-    print("The boss is strong, but you have the option to pursue it now.")
-    action = input("Do you want to pursue the boss? (y/n) ").strip().lower()
-    if action == 'y':
-        # Pursue the boss
-        if random.choice([True, False]):
-            print("You successfully pursued the boss and dealt 100 damage!")
-            return True
-        else:
-            print("You failed the pursuit and suffered 50 damage.")
-            player.take_damage(50)
-            return False
-    return True
+        print("You were defeated by the boss. Game Over.")
 
 def encounter(player, turn):
-    print("\nYou enter a new room...")
-    
-    # Randomly decide if an item is found
-    if random.random() < 0.2:  # 20% chance to find an item
-        items = [
-            ("sword", "You found a sword on the ground!"),
-            ("health potion", "You found a health potion on the ground!"),
-            ("robux gift card", "You found a Robux gift card on the ground!"),
-            ("chicken nuggets", "You found chicken nuggets on the ground!")
-        ]
-        item, message = random.choice(items)
-        print(message)
+    if turn % 3 == 0:  # Every third turn, find items
+        items = ["sword", "health potion", "robux gift card", "chicken nuggets"]
+        item = random.choice(items)
         player.inventory[item] += 1
-
-    if turn in [7, 11, 19, 27, 38, 45, 63, 71]:
-        shop(player)
-    elif turn == 25:
-        if not land_mine_room(player):
-            return False
-    elif turn == 50:
-        trader(player)
-    elif turn == 75:
-        if not boss_preview(player):
-            return False
+        print(f"You found a {item}!")
+    else:  # Otherwise, encounter a monster
+        monster = create_monster()
+        print(f"A wild {monster.name} appears!")
+        while monster.is_alive() and player.is_alive():
+            action = input("Do you want to (a)ttack, (r)un, use (g)ift card, or eat (c)hicken nuggets? ").strip().lower()
+            if action == 'a':
+                damage = player.attack()
+                monster.take_damage(damage)
+                print(f"You deal {damage} damage to the {monster.name}.")
+                if monster.is_alive():
+                    player.take_damage(monster.damage)
+                    print(f"The {monster.name} deals {monster.damage} damage to you.")
+            elif action == 'r':
+                if random.random() < 0.8:  # 80% chance to escape
+                    print("You successfully ran away!")
+                    break
+                else:
+                    damage = random.randint(5, 15)
+                    player.take_damage(damage)
+                    print(f"While running away, you got hurt and lost {damage} HP.")
+            elif action == 'g':
+                player.use_robux_gift_card()
+            elif action == 'c':
+                player.use_chicken_nuggets()
+            else:
+                print("Invalid action.")
+    
+    if not player.is_alive():
+        print("You have been defeated. Game Over.")
+        return False
     return True
 
-def main():
-    global turn
-    name = input("Enter your character's name: ").strip()
+def game():
+    name = input("Enter your character name: ")
     player = Player(name)
+    pursue_boss = False
     
-    turn = 0
-    while player.is_alive() and turn < 100:
-        turn += 1
-        print(f"\nTurn {turn}")
-        if not encounter(player, turn):
-            break
-        if turn == 100:
+    for turn in range(1, 101):
+        if turn == 25:
+            if not land_mine_room(player):
+                break
+        elif turn in [7, 11, 15, 21, 29, 38, 43, 51, 68, 73]:
+            trader(player)
+        elif turn == 50:
+            trader_turn_50(player)
+        elif turn == 75:
+            pursue_boss = boss_preview(player)
+        elif 75 < turn <= 90 and pursue_boss:
+            if not ask_boss_questions(player):
+                break
+        elif turn == 100:
             boss_fight(player)
+            break
+        else:
+            if not encounter(player, turn):
+                break
     
-    if player.is_alive() and turn == 100:
-        print("Congratulations, you survived the dungeon and defeated the final boss!")
+    print("\nGame Over!")
+    print(f"Player: {player.name}")
+    print(f"HP: {player.hp}")
+    print(f"Inventory: {player.inventory}")
+    print("Thanks for playing!")
 
-if __name__ == "__main__":
-    main()
-    
+# Start the game
+game()
